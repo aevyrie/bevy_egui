@@ -16,6 +16,7 @@ struct OriginalCameraTransform(Transform);
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .insert_resource(bevy::winit::WinitSettings::desktop_app())
         .add_plugin(EguiPlugin)
         .init_resource::<OccupiedScreenSpace>()
         .add_startup_system(setup_system)

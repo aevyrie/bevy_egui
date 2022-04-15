@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContext, EguiPlugin, EguiSettings};
+use wgpu::FilterMode;
 
 struct Images {
     bevy_icon: Handle<Image>,
@@ -24,6 +25,7 @@ fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.0, 0.0, 0.0)))
         .insert_resource(Msaa { samples: 4 })
+        .insert_resource(bevy::winit::WinitSettings::desktop_app())
         .init_resource::<UiState>()
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
@@ -70,6 +72,7 @@ fn update_ui_scale_factor(
 }
 
 fn ui_example(
+    mut assets: ResMut<Assets<Image>>,
     mut egui_ctx: ResMut<EguiContext>,
     mut ui_state: ResMut<UiState>,
     // You are not required to store Egui texture ids in systems. We store this one here just to
@@ -81,6 +84,14 @@ fn ui_example(
     // resource while building the app and use `Res<Images>` instead.
     images: Local<Images>,
 ) {
+    if let Some(sampler) = &mut assets
+        .get_mut(&images.bevy_icon)
+        .map(|s| &mut s.sampler_descriptor)
+    {
+        // Note that the linear sampler results in an image without artifacts when scaled.
+        sampler.mag_filter = FilterMode::Linear;
+        sampler.min_filter = FilterMode::Linear;
+    }
     let egui_texture_handle = ui_state
         .egui_texture_handle
         .get_or_insert_with(|| {
@@ -128,7 +139,7 @@ fn ui_example(
 
             ui.add(egui::widgets::Image::new(
                 *rendered_texture_id,
-                [256.0, 256.0],
+                [256., 256.],
             ));
 
             ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {

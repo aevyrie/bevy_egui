@@ -4,6 +4,7 @@ use bevy_egui::{egui, EguiContext, EguiPlugin};
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .insert_resource(bevy::winit::WinitSettings::desktop_app())
         .add_plugin(EguiPlugin)
         .add_system(ui_example)
         .run();
